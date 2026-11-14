@@ -1,5 +1,13 @@
 from interface.view.messages import Message
 
+def check_loop(func):
+	def wrapper(*arg, **kwarg):
+		while True:
+			if func(arg[0]):
+				if arg[0].show_confirm("Сохранить изменения?", "blue", "white"):
+					break
+	return wrapper
+
 class Setup (Message):
 	def __init__(self)-> None:
 		super().__init__()
@@ -29,7 +37,9 @@ class Setup (Message):
 			is_integer=False
 		finally:
 			return is_integer
-	def set_port(self)-> str:
+	@check_loop
+	def set_port(self)-> bool:
+		result: bool=False
 		port: str=str()
 		caption: str="Порт"
 		content: str="""
@@ -39,27 +49,50 @@ class Setup (Message):
 где n номер порта по порядку.
 ВНИМАНИЕ! Порт не может быть числом!
 """
-		content_confirm: str="""Введено числовое значение!
-		Повторить (у) или принять СОМ3 по умолчанию?"""
-		while True:
-			self.show_message(caption, content, "white", "blue")
-			port=self.show_prompt("Порт:", "white", "blue")
-			if self.verify_int(port):
-				if self.show_confirm(content_confirm, "white", "red"):
-					continue
-				else:
-					port=self.connection_data["port"]
-					break
-			if self.show_confirm("Сохранить ввод?", "blue", "white"):
-				break
-		return port
+		content_error: str="""Введено числовое значение!
+		Повторить (n) или принять СОМ3 по умолчанию? (y)"""
+		self.show_message(caption, content, "white", "blue")
+		port=self.show_prompt("Порт:", "white", "blue")
+		if not self.verify_int(port):
+			self.connection_data["port"]=port
+			result=True
+		else:
+			if self.show_confirm(content_error, "white", "red"):
+				result=True
+		return result
+
+	@check_loop
+	def set_parity(self)->bool:
+		port: str=str()
+		result: bool=False
+		caption: str="Введите чётность"
+		content: str="""
+Введите чётность, которая указана
+в настройках контроллера.
+ВНИМАНИЕ! Чётность не может быть числом и имеет следующие значения:
+- none
+- even
+- odd
+"""
+		content_error: str="Введено неверное значение. Повторить (n) или принять значение EVEN по умолчанию (у) "
+		self.show_message(caption, content, "white", "blue")
+		port=self.show_prompt("Чётность:", "white", "blue")
+		if not self.verify_int(port):
+			if port=="odd" or port=="even" or port=="none":
+				self.connection_data["parity"]=port
+				result=True
+			else:
+				if self.show_confirm(content_error, "white", "red"):
+					result=True
+		else:
+			if self.show_confirm(content_error, "white", "red"):
+				result=True
+		return result
 
 	def input_settings(self)-> None:
-		self.connection_data["port"]=self.set_port()
-		self.connection_data["parity"]=self.show_prompt("Parity (even/odd/none):", "white", "blue")
-		self.connection_data["baudrate"]=self.show_prompt("Baudrate (9600/19200/38400/57600):", "white", "blue")
-		self.connection_data["byte_size"]=self.show_prompt("Byte size (7/8):", "white", "blue")
-		self.connection_data["stop_bits"]=self.show_prompt("Stop bits:", "white", "blue")
+		self.set_port(self)
+		self.set_parity(self)
+
 	def setup_connection(self)-> dict:
 		self.show_wellcome()
 		if not self.default_settings():
