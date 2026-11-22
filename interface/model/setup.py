@@ -13,7 +13,7 @@ class Setup (Message):
 		super().__init__()
 		self.connection_data: dict=dict()
 		self.connection_data["baudrate"]: int=9600
-		self.connection_data["parity"]: str="even"
+		self.connection_data["parity"]: str="E"
 		self.connection_data["port"]: str="/dev/ttyUSB0"
 		self.connection_data["byte_size"]: int=8
 		self.connection_data["stop_bits"]: int=1
@@ -70,16 +70,16 @@ class Setup (Message):
 
 	@check_loop
 	def set_parity(self)->bool:
-		default_values: list[str]=["none", "even", "odd"]
+		default_values: list[str]=["N", "E", "O"]
 		result: bool=False
 		caption: str="Введите чётность"
 		content: str="""
 Введите чётность, которая указана
 в настройках контроллера.
 ВНИМАНИЕ! Чётность не может быть числом и имеет следующие значения:
-- none
-- even
-- odd
+- N(one)
+- E(ven)
+- O(dd)
 """
 		content_error: str="Введено неверное значение. Повторить (n) или принять значение EVEN по умолчанию (у) "
 		self.show_message(caption, content, "white", "blue")
