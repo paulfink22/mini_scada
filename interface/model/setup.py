@@ -14,10 +14,10 @@ class Setup (Message):
 		self.connection_data: dict=dict()
 		self.connection_data["baudrate"]: int=9600
 		self.connection_data["parity"]: str="E"
-		self.connection_data["port"]: str="/dev/ttyUSB0"
+		self.connection_data["port"]: str="/dev/ttyS0"
 		self.connection_data["byte_size"]: int=8
 		self.connection_data["stop_bits"]: int=1
-		self.connection_data["timeout"]: int=5
+		self.connection_data["timeout"]: int=60
 		self.connection_data["id"]: int=10
 
 	def show_wellcome(self)-> None:
@@ -43,14 +43,14 @@ class Setup (Message):
 
 	@check_loop
 	def set_port(self)-> bool:
-		default_values: list[str]=["COM1", "COM2", "COM3", "/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyUSB2", "/dev/ttyUSB3", "/dev/ttyUSB4"]
+		default_values: list[str]=["/dev/ttyS0", "/dev/ttyS1", "/dev/ttyS2", "/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyUSB2", "/dev/ttyUSB3", "/dev/ttyUSB4"]
 		result: bool=False
 		port: str=str()
 		caption: str="Порт"
 		content: str="""
 Введите порт.
 -В системе Windows это СОМn,
--в Linux /dev/ttyUSBn,
+-в Linux /dev/ttyUSBn, /dev/ttySn,
 где n номер порта по порядку.
 ВНИМАНИЕ! Порт не может быть числом!
 """
